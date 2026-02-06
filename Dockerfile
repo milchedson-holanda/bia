@@ -9,27 +9,27 @@ WORKDIR /usr/src/app
 
 # 1. Copiar package.json do backend
 COPY package*.json ./
-RUN npm install --loglevel=error --production
+RUN npm install --loglevel=error
 
 # 2. Copiar package.json do client
 COPY client/package*.json ./client/
-RUN cd client && npm install --legacy-peer-deps --loglevel=error --production
+RUN cd client && npm install --legacy-peer-deps --loglevel=error
 
 # 3. Copiar todo o código
 COPY . .
 
-# 4. Build do front-end
+# 4. Build do front-end (AGORA VITE ESTÁ INSTALADO)
 RUN cd client && VITE_API_URL=https://bia-formaws.com npm run build
 
-# 5. Mover build do frontend para pasta pública do backend (se necessário)
-RUN mv client/dist ./public || true
+# 5. Limpar node_modules do client (opcional para reduzir tamanho)
+RUN rm -rf client/node_modules
 
-# 6. Verificar estrutura do projeto
-RUN ls -la && echo "=== Backend structure ===" && find . -name "*.js" -o -name "*.json" | head -20
+# 6. Limpar devDependencies do backend (mantendo apenas production)
+RUN npm prune --production
 
-# 7. Expor porta correta
+# 7. Expor porta
 EXPOSE 8080
 
-# 8. Iniciar aplicação CORRETAMENTE
-# Verifique qual é o script "start" no package.json
-CMD ["node", "server.js"]  # OU ["npm", "start"] se estiver correto
+# 8. Iniciar aplicação
+# Verifique qual arquivo é o entry point
+CMD ["node", "server.js"]  # OU ["npm", "start"]
