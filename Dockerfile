@@ -32,4 +32,15 @@ EXPOSE 8080
 
 # 8. Iniciar aplicação
 # Verifique qual arquivo é o entry point
-CMD ["node", "server.js"]  # OU ["npm", "start"]
+# EXPOSE deve vir antes do CMD
+EXPOSE 8080
+
+# VERIFICAÇÃO DE SEGURANÇA - descubra qual entry point usar
+RUN echo "=== VERIFICAÇÃO ===" && \
+    echo "Arquivos JS encontrados:" && \
+    find . -name "*.js" -type f 2>/dev/null | grep -v node_modules | head -10 && \
+    echo "=== SCRIPTS DISPONÍVEIS ===" && \
+    cat package.json 2>/dev/null | grep -A5 '"scripts"' || echo "package.json não encontrado"
+
+# ENTRY POINT FLEXÍVEL - tenta diferentes opções
+CMD ["npm", "start"]
